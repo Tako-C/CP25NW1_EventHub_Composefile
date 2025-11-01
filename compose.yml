@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  eventhub-api:
+    build: ./CP25NW1_EventHub_Backend
+    container_name: eventhub_backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@Oracle_Event_hub:1521/XEPDB1"
+      SPRING_DATASOURCE_USERNAME: "C##ADMIN"
+      SPRING_DATASOURCE_PASSWORD: "admin123"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+    networks:
+      - eventhub-net
+    restart: unless-stopped
+
+networks:
+  eventhub-net:
+    external: true
+
+
+
+
+services:
+  oracledb:
+    image: container-registry.oracle.com/database/express
+    container_name: Oracle_Event_hub
+    environment:
+      ORACLE_PWD: "system1234"
+      ORACLE_CHARACTERSET: "AL32UTF8"
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - ./script_create_schema.sql:/tmp/script_create_schema.sql
+    networks:
+      - eventhub-net
+    restart: unless-stopped
+
+networks:
+  eventhub-net:
+    external: true
