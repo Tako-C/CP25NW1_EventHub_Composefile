@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   eventhub-api:
     build: ./CP25NW1_EventHub_Backend
@@ -25,7 +23,7 @@ services:
       - "1521:1521"
       - "5500:5500"
     volumes:
-      - ./script_create_schema.sql:/tmp/script_create_schema.sql
+      - ./CP25NW1_EventHub_Backend/script_create_schema.sql:/tmp/script_create_schema.sql
     networks:
       - eventhub-net
     restart: unless-stopped
