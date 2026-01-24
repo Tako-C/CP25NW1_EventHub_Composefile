@@ -1,3 +1,5 @@
+# version: '3.9'
+
 services:
   eventhub-api:
     build: ./CP25NW1_EventHub_Backend
@@ -9,9 +11,28 @@ services:
       SPRING_DATASOURCE_USERNAME: "C##ADMIN"
       SPRING_DATASOURCE_PASSWORD: "admin123"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+    volumes:
+      - ./upload:/upload 
     networks:
       - eventhub-net
     restart: unless-stopped
+    
+  eventhub-frontend:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_API_URL: http://cp25nw1.sit.kmutt.ac.th:8080
+        # NEXT_PUBLIC_API_URL: https://cp25nw1.sit.kmutt.ac.th/api
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    container_name: eventhub_frontend
+    ports:
+      - '3000:3000'
+    environment:
+      # - NEXT_PUBLIC_API_URL=http://cp25nw1.sit.kmutt.ac.th:8080
+      # - NEXT_PUBLIC_API_URL=https://cp25nw1.sit.kmutt.ac.th/api
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    networks:
+      - eventhub-net
     
   oracledb:
     image: container-registry.oracle.com/database/express
@@ -27,6 +48,19 @@ services:
     networks:
       - eventhub-net
     restart: unless-stopped
+
+  proxy:
+    container_name: eventhub_proxy
+    image: nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d 
+      - ./proxy/https:/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - eventhub-net
+    command: ["nginx", "-g", "daemon off;"]
 
 networks:
   eventhub-net:
